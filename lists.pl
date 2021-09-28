@@ -95,6 +95,31 @@ encode_direct(In, Out) :-
     % encode_modified already uses a direct solution
     encode_modified(In, Out).
 
+dupli([], []).
+dupli([H|T], [H,H|Rest]) :- dupli(T, Rest).
+
+dupli([], _, []).
+dupli([H|T], N, Out) :-
+    dupli_val(H, N, D),
+    dupli(T, N, R),
+    append(D, R, Out).
+
+dupli_val(_, 0, []).
+dupli_val(V, N, [V|Out]) :-
+    N > 0,
+    M is N - 1,
+    dupli_val(V, M, Out).
+
+drop(In, N, Out) :- drop(In, 1, N, Out).
+
+drop([], _, _, []).
+drop([_|T], N, N, Out) :-
+    drop(T, 1, N, Out).
+drop([H|T], I, N, [H|Out]) :-
+    I < N,
+    J is I + 1,
+    drop(T, J, N, Out).
+
 main :-
     my_last(d, [a, b, c, d]),
     my_almost_last(c, [a, b, c, d]),
@@ -113,4 +138,7 @@ main :-
     decode([[4, a], b, [2, c], [2, a], d, [4, e]],
         [a,a,a,a,b,c,c,a,a,d,e,e,e,e]),
     encode_direct([a,a,a,a,b,c,c,a,a,d,e,e,e,e],
-        [[4,a],b,[2,c],[2,a],d,[4,e]]).
+        [[4,a],b,[2,c],[2,a],d,[4,e]]),
+    dupli([a,b,c,c,d], [a,a,b,b,c,c,c,c,d,d]),
+    dupli([a,b,c],3, [a,a,a,b,b,b,c,c,c]),
+    drop([a,b,c,d,e,f,g,h,i,k],3,[a,b,d,e,g,h,k]).
