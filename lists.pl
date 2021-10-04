@@ -1,3 +1,5 @@
+:- use_module(library(random)).
+
 my_last(H, [H]).
 my_last(H, [_|R]) :- my_last(H, R).
 
@@ -153,6 +155,37 @@ remove_at(X, [H|T], N, [H|Out]) :-
     M is N - 1,
     remove_at(X, T, M, Out).
 
+insert_at(H, T, 1, [H|T]).
+insert_at(X, [H|T], N, [H|Out]) :-
+    N > 1,
+    M is N - 1,
+    insert_at(X, T ,M, Out).
+
+range(N, N, [N]).
+range(N, M, [N|R]) :-
+    N < M,
+    NN is N + 1,
+    range(NN, M, R).
+
+rnd_select(_In, 0, []).
+rnd_select(In, N, [X|Out]) :-
+    is_list(In),
+    N > 0,
+    M is N - 1,
+    length(In, Len),
+    random_between(1, Len, Idx),
+    remove_at(X, In, Idx, Rest),
+    rnd_select(Rest, M, Out).
+rnd_select(N, M, Out) :-
+    integer(N),
+    range(1, M, L),
+    rnd_select(L, N, Out).
+
+rnd_permu(In, Out) :-
+    length(In, Len),
+    rnd_select(In, Len, Out).
+
+
 main :-
     my_last(d, [a, b, c, d]),
     my_almost_last(c, [a, b, c, d]),
@@ -179,4 +212,19 @@ main :-
     slice([a,b,c,d,e,f,g,h,i,k], 3, 7, [c,d,e,f,g]),
     rotate([a,b,c,d,e,f,g,h], 3, [d,e,f,g,h,a,b,c]),
     rotate([a,b,c,d,e,f,g,h], -2, [g,h,a,b,c,d,e,f]),
-    remove_at(b, [a,b,c,d], 2, [a,c,d]).
+    remove_at(b, [a,b,c,d], 2, [a,c,d]),
+    insert_at(alfa, [a,b,c,d], 2, [a,alfa,b,c,d]),
+    range(4, 9, [4,5,6,7,8,9]),
+    L1 = [a,b,c,d,e,f,g,h],
+    rnd_select(L1, 3, L2),
+    length(L2, 3),
+    is_set(L2),
+    forall(member(X, L2), member(X, L1)),
+    rnd_select(6, 49, L3),
+    length(L3, 6),
+    is_set(L3),
+    forall(member(X, L3), (X > 0, X < 50)),
+    rnd_permu([a,b,c,d,e,f], L4),
+    length(L4, 6),
+    is_set(L4),
+    forall(member(X, L4), member(X, [a,b,c,d,e,f])).
