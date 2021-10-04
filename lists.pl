@@ -120,6 +120,39 @@ drop([H|T], I, N, [H|Out]) :-
     J is I + 1,
     drop(T, J, N, Out).
 
+split(In, 0, [], In).
+split([H|T], N, [H|Rest], L2) :-
+    M is N - 1,
+    split(T, M, Rest, L2).
+
+slice([H|_], _, 1, [H]).
+slice([H|T], 1, End, [H|Out]) :-
+    End > 1,
+    NewEnd is End - 1,
+    slice(T, 1, NewEnd, Out).
+slice([_|T], Start, End, Out) :-
+    Start > 1,
+    End > 1,
+    NewStart is Start - 1,
+    NewEnd is End - 1,
+    slice(T, NewStart, NewEnd, Out).
+
+rotate(In, N, Out) :-
+    N >= 0,
+    split(In, N, L1, L2),
+    append(L2, L1, Out).
+rotate(In, N, Out) :-
+    N < 0,
+    length(In, Len),
+    PosN is Len + N,
+    rotate(In, PosN, Out).
+
+remove_at(H, [H|T], 1, T).
+remove_at(X, [H|T], N, [H|Out]) :-
+    N > 1,
+    M is N - 1,
+    remove_at(X, T, M, Out).
+
 main :-
     my_last(d, [a, b, c, d]),
     my_almost_last(c, [a, b, c, d]),
@@ -141,4 +174,9 @@ main :-
         [[4,a],b,[2,c],[2,a],d,[4,e]]),
     dupli([a,b,c,c,d], [a,a,b,b,c,c,c,c,d,d]),
     dupli([a,b,c],3, [a,a,a,b,b,b,c,c,c]),
-    drop([a,b,c,d,e,f,g,h,i,k],3,[a,b,d,e,g,h,k]).
+    drop([a,b,c,d,e,f,g,h,i,k],3,[a,b,d,e,g,h,k]),
+    split([a,b,c,d,e,f,g,h,i,k], 3, [a,b,c], [d,e,f,g,h,i,k]),
+    slice([a,b,c,d,e,f,g,h,i,k], 3, 7, [c,d,e,f,g]),
+    rotate([a,b,c,d,e,f,g,h], 3, [d,e,f,g,h,a,b,c]),
+    rotate([a,b,c,d,e,f,g,h], -2, [g,h,a,b,c,d,e,f]),
+    remove_at(b, [a,b,c,d], 2, [a,c,d]).
